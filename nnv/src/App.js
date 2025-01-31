@@ -42,14 +42,14 @@ function App() {
                     <div className="upload-section">
                         <h2 className="upload-title">Upload Network</h2>
                         <label className="upload-area">
-                            <FontAwesomeIcon icon={faUpload} size="2x" className="upload-icon" />
+                            <FontAwesomeIcon icon={faUpload} size="2x" className="upload-icon"/>
                             <p className="upload-text">Click to upload or drag and drop</p>
                             <p className="upload-text">Neural network files</p>
                             <input
                                 type="file"
                                 onChange={handleFileChange}
                                 accept=".json,.h5,.pkl"
-                                style={{ display: 'none' }}
+                                style={{display: 'none'}}
                             />
                         </label>
 
@@ -63,8 +63,19 @@ function App() {
                             </div>
                         )}
                     </div>
+                    <div className="slider-container">
+                        <label className="slider-label">Hidden Layers</label>
+                        <input type="range" min="3" max="5" className="slider"/>
+                    </div>
+                    <div className="slider-container">
+                        <label className="slider-label">Max Inputs</label>
+                        <input type="range" min="10" max="100" className="slider"/>
+                    </div>
+                    <div className="slider-container">
+                        <label className="slider-label">Iterations</label>
+                        <input type="range" min="1" max="3" className="slider"/>
+                    </div>
                 </aside>
-
                 <main className="visualization-area">
                     {/* Your visualization content will go here */}
                 </main>
