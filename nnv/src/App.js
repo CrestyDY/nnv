@@ -75,6 +75,17 @@ function App() {
                         <label className="slider-label">Iterations</label>
                         <input type="range" min="1" max="3" className="slider"/>
                     </div>
+                    <div className="dropdown-container">
+                        <label className="dropdown-label">Select your activation function</label>
+                        <div className="dropdown-content">
+                            <select className="activation-dropdown">
+                                <option value="none">None selected</option>
+                                <option value="tanh">TanH</option>
+                                <option value="sigmoid">Sigmoid</option>
+                                <option value="softmax">Softmax</option>
+                            </select>
+                        </div>
+                    </div>
                 </aside>
                 <main className="visualization-area">
                     {/* Your visualization content will go here */}
