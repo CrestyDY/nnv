@@ -2,6 +2,7 @@ import tensorflow as tf
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 # Load and preprocess MNIST data
 (x_train, y_train), _ = tf.keras.datasets.mnist.load_data()
@@ -11,25 +12,64 @@ x_train = x_train.reshape((60000, 784)) / 255.0
 model = tf.keras.Sequential([
     tf.keras.layers.Dense(64, activation='relu', input_shape=(784,)),
     tf.keras.layers.Dense(64, activation='relu'),
-    tf.keras.layers.Dense(10, activation='softmax')  # Softmax output layer
+    tf.keras.layers.Dense(10, activation='softmax')
 ])
+
+# Create a directory for checkpoints if it doesn't exist
+checkpoint_dir = './checkpoints'
+if not os.path.exists(checkpoint_dir):
+    os.makedirs(checkpoint_dir)
+
+# Modified checkpoint callback with proper filepath
+checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+    filepath=os.path.join(checkpoint_dir, 'model_at_epoch_{epoch:02d}.h5'),
+    save_freq='epoch',
+    save_weights_only=False,  # Save the entire model
+    verbose=1  # Print when model is saved
+)
 
 model.compile(optimizer='adam',
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
 
 # Train the model
-history = model.fit(x_train, y_train, epochs=10, batch_size=32, validation_split=0.2, verbose=1)
+history = model.fit(x_train, y_train,
+                   epochs=10,
+                   steps_per_epoch= 500,
+                   callbacks=[checkpoint_callback],
+                   batch_size=32,
+                   validation_split=0.2,
+                   verbose=1)
 
-# Make final prediction AFTER training
-sample_image = x_train[0:1]
+# Load model from epoch 2 with error handling
+try:
+    model_epoch_2_path = os.path.join(checkpoint_dir, 'model_at_epoch_01.h5')
+    print(f"Loading model from: {model_epoch_2_path}")
+    if os.path.exists(model_epoch_2_path):
+        model_epoch_2 = tf.keras.models.load_model(model_epoch_2_path)
+        print("Successfully loaded model from epoch 2")
+    else:
+        print(f"Model file not found at {model_epoch_2_path}")
+except Exception as e:
+    print(f"Error loading model: {str(e)}")
+
+# Make predictions
+n = 15
+sample_image = x_train[n:n+1]
+
+# Get predictions from both models
 final_prediction = model.predict(sample_image, verbose=0)
+if 'model_epoch_2' in locals():
+    epoch_2_prediction = model_epoch_2.predict(sample_image, verbose=0)
+    print("\nEpoch 2 predictions:")
+    print("Raw output:", epoch_2_prediction[0])
+    print("Predicted digit:", np.argmax(epoch_2_prediction[0]))
 
-# *** KEY CHANGE: Print Softmax Probabilities ***
-print("Softmax Output (Final):", final_prediction[0])
+print("\nFinal model predictions:")
+print("Raw output:", final_prediction[0])
 predicted_label = np.argmax(final_prediction[0])
-print("Predicted Label (Final):", predicted_label)
-print("Actual Label:", y_train[0])
+print("Predicted digit:", predicted_label)
+print("Actual digit:", y_train[n])
 
 # Verify probabilities sum to ~1 (due to floating-point limitations)
 print("Sum of Probabilities:", np.sum(final_prediction[0]))
@@ -97,14 +137,18 @@ for layer_idx, layer in enumerate(model.layers):
 fig = plt.figure(figsize=(15, 10))
 gs = fig.add_gridspec(1, 3, width_ratios=[1, 2, 0.1])
 
+fig.patch.set_facecolor('gray')
+
 # Draw the original MNIST image
 ax0 = fig.add_subplot(gs[0])
-ax0.imshow(x_train[0].reshape(28, 28), cmap='gray')
+ax0.imshow(x_train[n].reshape(28, 28), cmap='gray')
+ax0.set_facecolor('gray')
 ax0.set_title(f"Input MNIST Image\nPredicted: {predicted_label}")
 ax0.axis('off')
 
 # Draw the neural network
 ax1 = fig.add_subplot(gs[1])
+ax1.set_facecolor('gray')
 ax1.axis('off')
 
 # Get node positions
@@ -148,6 +192,7 @@ ax1.set_title("Neural Network with Activations\nafter Final Training Iteration",
 
 # Add colorbar
 ax2 = fig.add_subplot(gs[2])
+ax2.set_facecolor('gray')
 norm = plt.Normalize(0, 1)
 sm = plt.cm.ScalarMappable(cmap=plt.cm.viridis, norm=norm)
 plt.colorbar(sm, cax=ax2, label="Neuron Activation Value")
