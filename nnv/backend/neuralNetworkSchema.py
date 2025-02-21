@@ -3,7 +3,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
 
-def generateSchema(testNumber, trainingImagesCount, iterations, numOfHiddenLayers, numOfData, activationFunction, outputActivationFunction):
+def generateSchema(testNumber, trainingImagesCount, iterations, numOfHiddenLayers, numOfData, neuronCount, activationFunction, outputActivationFunction):
     (x_train, y_train), _ = tf.keras.datasets.mnist.load_data()
     x_train = x_train.reshape((trainingImagesCount, 784))/255.0
 
@@ -38,6 +38,44 @@ def generateSchema(testNumber, trainingImagesCount, iterations, numOfHiddenLayer
         intermediatePredictions.append(intermediatePrediction)
 
     G = nx.DiGraph()
+    inputNeuronsToShow = neuronCount
+    for i in range(inputNeuronsToShow):
+        nodeName = getNodeName(0, i, "Input")
+        nodeValue = float(sampleImage[0, i])
+        G.add_node(nodeName, layer = 0, type = "Input", value = nodeValue, pos = (0, i))
+    G.add_node("inputDots", layer = 0, type = "dots", pos = (0, inputNeuronsToShow + 1))
+
+    for layerIndex, layer in enumerate(model.layers):
+        weights, biases = layer.get_weights()
+        layerActivations = intermediatePredictions[layerIndex][0]
+
+        nNeurons = layer.units
+        neuronsToShow = min(inputNeuronsToShow, nNeurons)
+
+        for i in range(neuronsToShow):
+            nodeName = getNodeName(layerIndex + 1, i)
+            nodeValue = float(layerActivations[i])
+            if layerIndex == len(model.layers) - 1:
+                nodeValue = finalPrediction[0][i]
+            G.add_node(nodeName, layer = layerIndex + 1, type = "neuron", bias = float(biases[i]), value = nodeValue, pos = (layerIndex + 1, i))
+
+        if neuronsToShow < nNeurons:
+            G.add_node(f"L{layerIndex + 1}_dots", layer=layerIndex + 1,
+                 type="dots", pos=(layerIndex + 1, neuronsToShow + 1))
+
+        prevNeurons = inputNeuronsToShow if layerIndex == 0 else min(10, model.layers[layerIndex - 1].units)
+
+        for i in range(prevNeurons):
+            for j in range(neuronsToShow):
+                if layerIndex == 0:
+                    source = getNodeName(0, i, "Input")
+                else:
+                    source = getNodeName(layerIndex, i)
+                target = getNodeName(layerIndex + 1, j)
+                weight = float(weights[i,j])
+                G.add_edge(source, target, weight = weight)
+
+
 
 def getNodeName(layerIndex, neuronIndex, layerType = "neuron"):
     return f"L{layerIndex}_{layerType}_{neuronIndex}"
