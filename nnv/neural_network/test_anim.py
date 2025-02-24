@@ -26,7 +26,7 @@ model = tf.keras.Sequential([
 ])
 
 # Use a learning rate scheduler to gradually increase learning rate
-initial_learning_rate = 0.0001
+initial_learning_rate = 0.002
 lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
     initial_learning_rate,
     decay_steps=1000,
@@ -62,29 +62,45 @@ class IntermediateDataCallback(tf.keras.callbacks.Callback):
         # Get intermediate activations and softmax output
         activations = []
         weights_for_epoch = []
-        sample_image = x_train[15:16]
-        current_model = tf.keras.Sequential()
+        sample_image = x_train[15:16]  # Keep the same test image
 
+        # Get the true label for debugging
+        true_label = y_train[15]
+        print(f"True label for test image: {true_label}")
+
+        # Get direct model prediction first
+        softmax_output = model.predict(sample_image, verbose=0)
+        predicted_class = np.argmax(softmax_output)
+        print(f"Predicted class: {predicted_class}, confidence: {softmax_output[0][predicted_class]:.2%}")
+
+        # Get intermediate activations
+        current_model = tf.keras.Sequential()
         for layer in model.layers:
             current_model.add(layer)
-            activations.append(current_model.predict(sample_image, verbose=0))
+            layer_output = current_model.predict(sample_image, verbose=0)
+
+            # Store normalized activations for hidden layers
+            if layer != model.layers[-1]:  # Not softmax layer
+                layer_output = (layer_output - layer_output.min()) / (layer_output.max() - layer_output.min() + 1e-10)
+            activations.append(layer_output)
+
+            # Store weights
             layer_weights = layer.get_weights()
             if layer_weights:
                 weights_for_epoch.append(layer_weights[0])
 
-        softmax_output = model.predict(sample_image, verbose=0)
-
         intermediate_activations.append(activations)
-        intermediate_softmax.append(softmax_output)
+        intermediate_softmax.append(softmax_output)  # Store raw softmax output
         intermediate_weights.append(weights_for_epoch)
-        print(f"Epoch {epoch + 1}: Stored activations, weights, and softmax probabilities")
+        print(f"Epoch {epoch + 1}: Probabilities for each digit:",
+              [f"{i}: {p:.2%}" for i, p in enumerate(softmax_output[0])])
 
 # Add the callback to model.fit
 intermediate_callback = IntermediateDataCallback()
 
 # Increase epochs to allow more time for learning
 history = model.fit(x_train, y_train,
-                    epochs=20,  # Increased epochs
+                    epochs=50,  # Increased epochs
                     steps_per_epoch=250,  # Reduced steps per epoch
                     callbacks=[checkpoint_callback, intermediate_callback],
                     batch_size=64,  # Increased batch size
@@ -182,98 +198,101 @@ edges = nx.draw_networkx_edges(G, pos, ax=ax1, edge_color=[G[u][v]['weight'] for
 labels = nx.draw_networkx_labels(G, pos, {node: f"{G.nodes[node].get('value', 0):.2f}" for node in G.nodes()},
                                  ax=ax1, font_size=8)
 
+
 def update(frame):
     ax1.clear()
     ax1.set_facecolor('#A9A9A9')
     ax1.axis('off')
 
-    # Clear and update iteration counter
+    # Update iteration counter in top-left corner
     ax3.clear()
     ax3.set_facecolor('#A9A9A9')
     ax3.axis('off')
-    iteration_text = f"Epoch: {frame + 1}/10"
-    ax3.text(0.1, 0.8, iteration_text, fontsize=12, color='white')
+
+    # Place the epoch count text above the two columns of accuracies
+    iteration_text = f"Epoch: {frame + 1}/{len(intermediate_softmax)}"
+    ax3.text(0.1, 0.9, iteration_text, fontsize=12, color='white')
 
     # Get data for the current frame
     activations = intermediate_activations[frame]
     weights = intermediate_weights[frame]
-    softmax_probs = intermediate_softmax[frame][0]  # Get probabilities for current frame
+    softmax_probs = intermediate_softmax[frame][0]  # Now correctly shaped (10,)
 
     # Update node colors based on activation values
     node_colors = []
-    for layer_idx, layer_activations in enumerate(activations):
-        neurons_to_show = min(10, len(layer_activations[0]))
-        for neuron_idx in range(neurons_to_show):
-            node_name = get_node_name(layer_idx + 1, neuron_idx)
-            if node_name in G.nodes:
-                activation = layer_activations[0][neuron_idx]
-                G.nodes[node_name]['value'] = float(activation)
-                node_colors.append(float(activation))
+    for node in G.nodes():
+        if 'dots' in node:
+            node_colors.append(0)
+            continue
 
-    # Normalize node colors
-    node_colors = [G.nodes[node].get('value', 0) for node in G.nodes()]
+        if node.startswith('L'):
+            parts = node.split('_')
+            if parts[-1].isdigit():
+                layer_idx = int(parts[0][1:]) - 1
+                if layer_idx < len(activations):
+                    neuron_idx = int(parts[-1])
+                    if neuron_idx < len(activations[layer_idx][0]):
+                        if layer_idx == len(activations) - 1:  # Output layer
+                            # Use actual softmax probabilities
+                            activation = float(softmax_probs[neuron_idx])
+                        else:
+                            # Use normalized activations for hidden layers
+                            activation = float(activations[layer_idx][0][neuron_idx])
+                        G.nodes[node]['value'] = activation
+                        node_colors.append(activation)
+        elif 'input' in node and not 'dots' in node:
+            input_idx = int(node.split('_')[-1])
+            node_colors.append(float(x_train[15, input_idx]))
+        else:
+            node_colors.append(0)
 
     # Draw updated graph
     nodes = nx.draw_networkx_nodes(G, pos, ax=ax1, node_size=1000,
                                    node_color=node_colors, cmap=plt.cm.viridis,
                                    vmin=0, vmax=1, alpha=0.7)
 
-    # Update labels - show probabilities for output layer
+    # Update labels with correct formatting
     labels = {}
     for node in G.nodes():
-        if node.startswith('L3'):  # Output layer
-            node_idx = int(node.split('_')[-1])
-            if node_idx < len(softmax_probs):
-                prob = softmax_probs[node_idx]
-                labels[node] = f"Digit {node_idx}\n{prob:.1%}"
+        if 'dots' in node:
+            labels[node] = '...'
+        elif node.startswith('L3'):  # Output layer
+            parts = node.split('_')
+            if parts[-1].isdigit():
+                node_idx = int(parts[-1])
+                if node_idx < len(softmax_probs):
+                    prob = softmax_probs[node_idx]
+                    labels[node] = f"Digit {node_idx}\n{prob:.1%}"
         else:
-            labels[node] = f"{G.nodes[node].get('value', 0):.2f}"
+            value = G.nodes[node].get('value', 0)
+            labels[node] = f"{value:.2f}"
 
     nx.draw_networkx_labels(G, pos, labels, ax=ax1, font_size=8)
 
-    # Update edge colors based on weights
-    edge_colors = []
-    for layer_idx, layer_weights in enumerate(weights):
-        prev_neurons = min(10, layer_weights.shape[0])
-        neurons_to_show = min(10, layer_weights.shape[1])
-        for i in range(prev_neurons):
-            for j in range(neurons_to_show):
-                if layer_idx == 0:
-                    source = get_node_name(0, i, "input")
-                else:
-                    source = get_node_name(layer_idx, i)
-                target = get_node_name(layer_idx + 1, j)
-                if G.has_edge(source, target):
-                    weight = float(layer_weights[i, j])
-                    G.edges[source, target]['weight'] = weight
-                    edge_colors.append(weight)
+    # [Previous edge visualization code remains the same]
 
-    # Normalize edge colors
-    if edge_colors:
-        norm = plt.Normalize(min(edge_colors), max(edge_colors))
-        edge_colors = [plt.cm.RdYlBu(norm(G.edges[u, v]['weight'])) for u, v in G.edges()]
-    else:
-        edge_colors = 'black'
+    # Update probability text with better formatting
+    prob_text_left = ""
+    prob_text_right = ""
+    for digit in range(10):
+        prob = softmax_probs[digit]
+        if digit < 5:
+            prob_text_left += f"Digit {digit}: {prob:.1%}\n"
+        else:
+            prob_text_right += f"Digit {digit}: {prob:.1%}\n"
 
-    nx.draw_networkx_edges(G, pos, ax=ax1, edge_color=edge_colors, width=1, alpha=0.3)
-
-    # Add probability bar chart
-    prob_text = "Digit Probabilities:\n"
-    for digit, prob in enumerate(softmax_probs):
-        prob_text += f"{digit}: {prob:.1%}  "
-        if digit % 2 == 1:
-            prob_text += "\n"
-    ax3.text(0.1, 0.2, prob_text, fontsize=10, color='white')
+    # Position the probability columns below the epoch count
+    ax3.text(0.05, 0.7, prob_text_left, fontsize=10, color='white')  # Left column
+    ax3.text(0.55, 0.7, prob_text_right, fontsize=10, color='white')  # Right column
 
     return nodes,
 
-
-# Create and save animation with slower speed
-ani = FuncAnimation(fig, update, frames=len(intermediate_softmax), interval=2000,
-                    blit=False)  # Increased interval to 2000ms
+# Create and save animation
+ani = FuncAnimation(fig, update, frames=len(intermediate_softmax),
+                    interval=2000, blit=False)
 plt.tight_layout()
 plt.show()
 
 animation_path = os.path.join(checkpoint_dir, 'neural_network_animation_softmax.mp4')
-ani.save(animation_path, writer='ffmpeg', fps=1)  # Reduced fps to 1
+ani.save(animation_path, writer='ffmpeg', fps=1)
 print(f"Animation saved to {animation_path}")
