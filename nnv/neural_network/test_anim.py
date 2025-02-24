@@ -26,7 +26,7 @@ model = tf.keras.Sequential([
 ])
 
 # Use a learning rate scheduler to gradually increase learning rate
-initial_learning_rate = 0.002
+initial_learning_rate = 0.0005
 lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
     initial_learning_rate,
     decay_steps=1000,
@@ -281,9 +281,9 @@ def update(frame):
         else:
             prob_text_right += f"Digit {digit}: {prob:.1%}\n"
 
-    # Position the probability columns below the epoch count
-    ax3.text(0.05, 0.7, prob_text_left, fontsize=10, color='white')  # Left column
-    ax3.text(0.55, 0.7, prob_text_right, fontsize=10, color='white')  # Right column
+    # Position the probability columns significantly lower and reduce font size
+    ax3.text(0.05, 0.4, prob_text_left, fontsize=8, color='white')  # Left column
+    ax3.text(0.55, 0.4, prob_text_right, fontsize=8, color='white')  # Right column
 
     return nodes,
 
