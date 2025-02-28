@@ -17,7 +17,7 @@ model = tf.keras.Sequential([
     tf.keras.layers.Dense(32, activation='relu', input_shape=(784,),
                          kernel_initializer=initializer,
                          bias_initializer=initializer),
-    tf.keras.layers.Dense(16, activation='relu',
+    tf.keras.layers.Dense(10, activation='relu',
                          kernel_initializer=initializer,
                          bias_initializer=initializer),
     tf.keras.layers.Dense(10, activation='softmax',
@@ -58,14 +58,14 @@ intermediate_weights = []
 
 # Modified callback to store intermediate data including weights
 class IntermediateDataCallback(tf.keras.callbacks.Callback):
-    def on_epoch_end(self, epoch, imageNumber, logs=None):
+    def on_epoch_end(self, epoch, logs=None):
         # Get intermediate activations and softmax output
         activations = []
         weights_for_epoch = []
-        sample_image = x_train[imageNumber:imageNumber + 1]  # Keep the same test image
+        sample_image = x_train[15:16]  # Keep the same test image
 
         # Get the true label for debugging
-        true_label = y_train[imageNumber]
+        true_label = y_train[15]
         print(f"True label for test image: {true_label}")
 
         # Get direct model prediction first
@@ -293,6 +293,6 @@ ani = FuncAnimation(fig, update, frames=len(intermediate_softmax),
 plt.tight_layout()
 plt.show()
 
-animation_path = os.path.join(checkpoint_dir, 'nnv_anim.mp4')
+animation_path = os.path.join(checkpoint_dir, 'neural_network_animation_softmax.mp4')
 ani.save(animation_path, writer='ffmpeg', fps=1)
 print(f"Animation saved to {animation_path}")
