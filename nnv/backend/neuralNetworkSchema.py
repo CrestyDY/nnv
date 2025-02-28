@@ -159,7 +159,7 @@ def trainModel(model, x_train, y_train, iterations, numOfData, imageNumber, chec
     return history, intermediateCallback
 
 
-def setupPlot(x_train, imageNumber, G, max_activation=None):
+def setupPlot(x_train, y_train, imageNumber, G, max_activation=None):
     fig = plt.figure(figsize=(15, 10))
     gs = fig.add_gridspec(2, 4, height_ratios=[4, 1], width_ratios=[1, 2, 0.1, 0.1])
 
@@ -168,7 +168,7 @@ def setupPlot(x_train, imageNumber, G, max_activation=None):
     ax0 = fig.add_subplot(gs[0, 0])
     ax0.imshow(x_train[imageNumber].reshape(28, 28), cmap="gray")
     ax0.set_facecolor("gray")
-    ax0.set_title("Input MNIST Image")
+    ax0.set_title(f"Input MNIST Image: {y_train[imageNumber]}")
     ax0.axis("off")
 
     ax_hidden_cbar = fig.add_subplot(gs[0:2, 2])
@@ -399,7 +399,7 @@ def generateSchema(testNumber=15, iterations=50,
 
     max_activation = np.ceil(max_activation)
 
-    fig, ax0, ax1, ax2, ax3, pos = setupPlot(x_train, testNumber, G, max_activation)
+    fig, ax0, ax1, ax2, ax3, pos = setupPlot(x_train, y_train, testNumber, G, max_activation)
 
     ani = createAnimation(
         fig,
@@ -428,11 +428,11 @@ def generateSchema(testNumber=15, iterations=50,
 
 if __name__ == "__main__":
     result = generateSchema(
-        testNumber=109,
-        iterations=30,
-        numOfHiddenLayers=2,
-        numOfData=250,
+        testNumber=120,
+        iterations= 25,
+        numOfHiddenLayers= 2,
+        numOfData=500,
         neuronCount=32,
-        activationFunction='relu',
+        activationFunction='tanh',
         outputActivationFunction='softmax'
     )

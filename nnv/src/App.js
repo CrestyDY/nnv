@@ -65,7 +65,7 @@ function App() {
                     </div>
                     <div className="slider-container">
                         <label className="slider-label">Hidden Layers</label>
-                        <input type="range" min="3" max="5" className="slider"/>
+                        <input type="range" min="1" max="5" className="slider"/>
                     </div>
                     <div className="slider-container">
                         <label className="slider-label">Max Inputs</label>
@@ -73,7 +73,7 @@ function App() {
                     </div>
                     <div className="slider-container">
                         <label className="slider-label">Iterations</label>
-                        <input type="range" min="1" max="3" className="slider"/>
+                        <input type="range" min="5" max="100" className="slider"/>
                     </div>
                     <div className="dropdown-container">
                         <label className="dropdown-label">Select your activation function</label>
