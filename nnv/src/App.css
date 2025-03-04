@@ -1,43 +1,53 @@
-/* Keep your existing Header and Title styles */
+/* Aligned Header and Title styles */
 .Header {
+  position: relative;
   display: flex;
   width: 100%;
-  min-height: 6.4vh;
+  height: 6.4vh;
+  background-color: #00b3b3;
+  border-bottom: 2px solid #00b3b3;
 }
 
+/* Title section spans 60% */
 .Title {
   background-image: linear-gradient(90deg, #000000, #00b3b3);
-  font-size: calc(3.5px + 3vmin);
+  font-size: clamp(18px, 3vmin, 32px);
   font-family: Orbitron, "Segoe Script", sans-serif;
   font-weight: bold;
-  color: #000000;
   text-align: center;
-  padding: 10px;
-  flex: 1;
-  max-width: 25%;
+  padding: 0 10px;
+  flex: 1.5;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: absolute;
+  height: 100%;
 }
 
+.Logo{
+
+}
 .NNV {
-  background: linear-gradient(to right, #FFFFFF, #000000);
+  background: linear-gradient(to right, #00b3b3, #000000);
+  font-size: clamp(18px, 3vmin, 32px);
+  display: inline-block; /* Ensures correct text rendering */
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
+  text-align: center;
 }
 
 .Contact {
   background: linear-gradient(90deg, #00b3b3 25%, #000000);
-  flex: 3;
+  flex: 2;
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  padding: 10px;
+  padding: 0 10px;
   gap: 30px;
+  height: 100%;
 }
 
+/* Main container */
 .main-container {
   display: flex;
   height: calc(100vh - 6.4vh);
@@ -46,6 +56,7 @@
 }
 
 .sidebar {
+  position: relative;
   width: 15%;
   min-width: 200px;
   max-width: 250px;
@@ -62,6 +73,7 @@
   color: white;
   width: 100%;
   box-sizing: border-box;
+  margin-bottom: 12px;
 }
 
 .upload-title {
@@ -75,7 +87,6 @@
   text-overflow: ellipsis;
 }
 
-/* Modified upload area styles */
 .upload-area {
   border: 2px dashed #00b3b3;
   border-radius: 6px;
@@ -84,9 +95,9 @@
   cursor: pointer;
   transition: all 0.3s ease;
   margin-bottom: 12px;
-  width: calc(100% - 16px); /* Account for padding */
+  width: calc(100% - 16px);
   box-sizing: border-box;
-  max-width: 180px; /* Limit maximum width */
+  max-width: 180px;
   margin-left: auto;
   margin-right: auto;
   display: flex;
@@ -157,9 +168,79 @@
   cursor: pointer;
   border-radius: 50%;
 }
+
+.input-container{
+  width: 100%;
+  max-width: 180px;
+  margin: 0 auto 12px;
+}
+.input-label{
+  font-family: Orbitron, sans-serif;
+  text-align: center;
+  color: #00b3b3;
+  margin-bottom: 12px;
+  font-size: 0.8em;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+input[type=number]{
+  font-family: Orbitron, sans-serif;
+  font-size: 0.9em;
+  width: 100%;
+  background-color: #111111;
+  color: #00b3b3;
+  border: 2px solid #00b3b3;
+  border-radius: 4px;
+}
+
 .visualization-area {
-  width: 85%;
-  background: black;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  background-color: #111111;
+}
+
+.mnist-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.mnist-image {
+  max-width: 200px;
+  max-height: 200px;
+  border: 1px solid #ddd;
+  border-radius: 4px ;
+  background-color: #00b3b3;
+}
+
+.mnist-label {
+  margin-top: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #00b3b3;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.placeholder-text {
+  color: #666;
+  text-align: center;
 }
 .dropdown-container {
   width: 100%;
@@ -196,4 +277,31 @@
 .activation-dropdown:focus {
   outline: none;
   box-shadow: 0 0 5px rgba(0, 179, 179, 0.5);
+}
+
+.submit-button{
+  position: absolute;
+  bottom: 20px;
+  left: 20%;
+  width: 60%;
+  height: 70px;
+  margin: 0 auto 12px;
+  font-family: Orbitron, sans-serif;
+  text-align: center;
+  background-color: #111111;
+  border: 2px solid #00b3b3;
+  border-radius: 10px;
+  color: #00b3b3;
+  font-size: 0.8em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.submit-button:hover{
+  border-color: #008080;
+  background-color: rgba(55, 219, 192, 0.5);
 }

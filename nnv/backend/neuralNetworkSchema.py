@@ -422,6 +422,7 @@ def generateSchema(testNumber=15, iterations=50,
                    neuronsToDisplay=10, learningRate=0.0005, showAnimation=True):
     (x_train, y_train), _ = tf.keras.datasets.mnist.load_data()
     x_train = x_train.reshape((60000, 784)) / 255.0
+    print(len(x_train))
 
     model = createNeuralNetwork(
         activationFunction,
@@ -479,7 +480,7 @@ if __name__ == "__main__":
         testNumber=120,
         iterations=5,
         numOfHiddenLayers= 3,
-        numOfData=500,
+        numOfData=60000,
         neuronCount=32,
         activationFunction='relu',
         outputActivationFunction='softmax',
