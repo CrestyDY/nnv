@@ -1,5 +1,4 @@
 import math
-
 import tensorflow as tf
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -95,12 +94,7 @@ def createNeuralNetwork(activationFunction, outputActivationFunction, numOfHidde
 def createGraph(model, x_train, imageNumber, neuronsToDisplay):
     G = nx.DiGraph()
 
-    inputNeuronsToShow = neuronsToDisplay
-    for i in range(inputNeuronsToShow):
-        nodeName = getNodeName(0, i, "input")
-        nodeValue = float(x_train[imageNumber, i])
-        G.add_node(nodeName, layer=0, type="input", value=nodeValue, pos=(0, i))
-    G.add_node("input_dots", layer=0, type="dots", pos=(0, inputNeuronsToShow + 1))
+    G.add_node("input_colorbar", layer=0, type="input_colorbar", pos=(0, 0))
 
     for layerIndex, layer in enumerate(model.layers):
         weights, biases = layer.get_weights()
@@ -116,22 +110,23 @@ def createGraph(model, x_train, imageNumber, neuronsToDisplay):
             G.add_node(f"L{layerIndex + 1}_dots", layer=layerIndex + 1,
                        type="dots", pos=(layerIndex + 1, neuronsToShow + 1))
 
-        prevNeurons = x_train.shape[1] if layerIndex == 0 else model.layers[layerIndex - 1].units
-        prevNeuronsToShow = min(neuronsToDisplay, prevNeurons)
-
-        for i in range(prevNeuronsToShow):
+        if layerIndex == 0:
             for j in range(neuronsToShow):
-                if layerIndex == 0:
-                    source = getNodeName(0, i, "input")
-                else:
-                    source = getNodeName(layerIndex, i)
                 target = getNodeName(layerIndex + 1, j)
-                weight = float(weights[i, j])
-                G.add_edge(source, target, weight=weight)
+                avg_weight = float(np.mean(weights[:, j]))
+                G.add_edge("input_colorbar", target, weight=avg_weight)
+        else:
+            prevNeurons = model.layers[layerIndex - 1].units
+            prevNeuronsToShow = min(neuronsToDisplay, prevNeurons)
+
+            for i in range(prevNeuronsToShow):
+                for j in range(neuronsToShow):
+                    source = getNodeName(layerIndex, i)
+                    target = getNodeName(layerIndex + 1, j)
+                    weight = float(weights[i, j])
+                    G.add_edge(source, target, weight=weight)
 
     return G
-
-
 
 def trainModel(model, x_train, y_train, iterations, numOfData, imageNumber, checkpointDir="./checkpoints"):
     if not os.path.exists(checkpointDir):
@@ -161,7 +156,8 @@ def trainModel(model, x_train, y_train, iterations, numOfData, imageNumber, chec
 
 def setupPlot(x_train, y_train, imageNumber, G, max_activation=None):
     fig = plt.figure(figsize=(15, 10))
-    gs = fig.add_gridspec(2, 4, height_ratios=[4, 1], width_ratios=[1, 2, 0.1, 0.1])
+
+    gs = fig.add_gridspec(2, 5, height_ratios=[4, 1], width_ratios=[1, 0.1, 3, 0.1, 0.1])
 
     fig.patch.set_facecolor("#A9A9A9")
 
@@ -171,35 +167,58 @@ def setupPlot(x_train, y_train, imageNumber, G, max_activation=None):
     ax0.set_title(f"Input MNIST Image: {y_train[imageNumber]}")
     ax0.axis("off")
 
-    ax_hidden_cbar = fig.add_subplot(gs[0:2, 2])
+    ax_input_cbar = fig.add_subplot(gs[0:2, 1])
+    ax_input_cbar.set_facecolor("#A9A9A9")
+
+    input_data = x_train[imageNumber].reshape(28, 28)
+    im = ax_input_cbar.imshow(input_data.reshape(-1, 1), cmap="binary", aspect='auto')
+    ax_input_cbar.set_title("Input\nLayer\n(784\nnodes)", fontsize=8)
+    ax_input_cbar.set_xticks([])
+    ax_input_cbar.set_yticks([0, 783])
+    ax_input_cbar.set_yticklabels(['Node 0', 'Node 783'])
+
+    ax_hidden_cbar = fig.add_subplot(gs[0:2, 3])
     ax_hidden_cbar.set_facecolor("#A9A9A9")
-    max_val = max_activation
+    max_val = max_activation if max_activation is not None else 1.0
     norm_hidden = plt.Normalize(0, max_val)
     sm_hidden = plt.cm.ScalarMappable(cmap=plt.cm.binary, norm=norm_hidden)
+    sm_hidden.set_array([])
     cbar_hidden = plt.colorbar(sm_hidden, cax=ax_hidden_cbar)
     cbar_hidden.set_label("Hidden Layer Activation")
 
-    ax1 = fig.add_subplot(gs[0:2, 1])
+    ax1 = fig.add_subplot(gs[0:2, 2])
     ax1.set_facecolor("#A9A9A9")
     ax1.axis("off")
 
-    ax2 = fig.add_subplot(gs[0:2, 3])
+    ax2 = fig.add_subplot(gs[0:2, 4])
     ax2.set_facecolor("#A9A9A9")
     norm_prob = plt.Normalize(0, 1)
     sm_prob = plt.cm.ScalarMappable(cmap=plt.cm.viridis, norm=norm_prob)
+    sm_prob.set_array([])
     cbar_prob = plt.colorbar(sm_prob, cax=ax2)
     cbar_prob.set_label("Output Probability")
 
-    ax3 = fig.add_subplot(gs[1, 0:1])
+    ax3 = fig.add_subplot(gs[1, 0:2])
     ax3.set_facecolor("#A9A9A9")
     ax3.axis("off")
 
     pos = nx.get_node_attributes(G, "pos")
 
-    return fig, ax0, ax1, ax2, ax3, pos
+    if "input_colorbar" in pos:
+        layer1_nodes = [n for n in G.nodes() if "L1_" in n and "_dots" not in n]
+        if layer1_nodes:
+            y_values = [pos[n][1] for n in layer1_nodes]
+            min_y = min(y_values)
+            max_y = max(y_values)
+            center_y = (min_y + max_y) / 2
+        else:
+            center_y = 0
+        pos["input_colorbar"] = (0, center_y)
+
+    return fig, ax0, ax_input_cbar, ax1, ax2, ax3, ax_hidden_cbar, pos
 
 
-def updateFrame(frame, ax1, ax3, G, pos, intermediateActivations, intermediateSoftmax,
+def updateFrame(frame, ax1, ax3, ax_input_cbar, ax_hidden_cbar, G, pos, intermediateActivations, intermediateSoftmax,
                 intermediateWeights, x_train, imageNumber, numOfHiddenLayers, max_activation=None):
     ax1.clear()
     ax1.set_facecolor("#A9A9A9")
@@ -208,6 +227,15 @@ def updateFrame(frame, ax1, ax3, G, pos, intermediateActivations, intermediateSo
     ax3.clear()
     ax3.set_facecolor("#A9A9A9")
     ax3.axis("off")
+
+    ax_input_cbar.clear()
+    input_data = x_train[imageNumber].reshape(28, 28)
+    im = ax_input_cbar.imshow(input_data.reshape(-1, 1), cmap="binary", aspect='auto')
+    ax_input_cbar.set_title("Input\nLayer\n(784\nnodes)", fontsize=8)
+    ax_input_cbar.set_xticks([])
+    ax_input_cbar.set_yticks([0, 783])
+    ax_input_cbar.set_yticklabels(['Node 0', 'Node 783'])
+    ax_input_cbar.set_ylim(783, 0)
 
     iterationText = f"Epoch: {frame + 1}/{len(intermediateSoftmax)}"
     ax3.text(0.1, 0.9, iterationText, fontsize=12, color="white")
@@ -221,6 +249,12 @@ def updateFrame(frame, ax1, ax3, G, pos, intermediateActivations, intermediateSo
     nodeValues = []
 
     for node in G.nodes():
+        if node == "input_colorbar":
+            nodeColors.append(0)
+            nodeLayerTypes.append("input_colorbar")
+            nodeValues.append(0)
+            continue
+
         if "dots" in node:
             nodeColors.append(0)
             nodeLayerTypes.append("hidden")
@@ -233,13 +267,7 @@ def updateFrame(frame, ax1, ax3, G, pos, intermediateActivations, intermediateSo
                 layerIndex = int(parts[0][1:]) - 1
                 neuronIndex = int(parts[-1])
 
-                if layerIndex == -1:
-                    inputIndex = neuronIndex
-                    input_value = float(x_train[imageNumber, inputIndex])
-                    nodeColors.append(input_value)
-                    nodeLayerTypes.append("input")
-                    nodeValues.append(input_value)
-                elif layerIndex == numOfHiddenLayers:
+                if layerIndex == numOfHiddenLayers:
                     if neuronIndex < len(softmaxProbs):
                         activation = float(softmaxProbs[neuronIndex])
                         G.nodes[node]["value"] = activation
@@ -251,7 +279,6 @@ def updateFrame(frame, ax1, ax3, G, pos, intermediateActivations, intermediateSo
                         nodeLayerTypes.append("output")
                         nodeValues.append(0)
                 else:
-                    # Hidden layers
                     if layerIndex < len(activations) and neuronIndex < activations[layerIndex].shape[1]:
                         activation = float(activations[layerIndex][0, neuronIndex])
                         G.nodes[node]["value"] = activation
@@ -267,13 +294,14 @@ def updateFrame(frame, ax1, ax3, G, pos, intermediateActivations, intermediateSo
             nodeLayerTypes.append("hidden")
             nodeValues.append(0)
 
-    hidden_nodes = [i for i, t in enumerate(nodeLayerTypes) if t == "hidden" or t == "input"]
+    hidden_nodes = [i for i, t in enumerate(nodeLayerTypes) if t == "hidden"]
     output_nodes = [i for i, t in enumerate(nodeLayerTypes) if t == "output"]
+    input_colorbar_node = [i for i, t in enumerate(nodeLayerTypes) if t == "input_colorbar"]
 
     nodes_list = list(G.nodes())
 
     actual_max = max(np.array(nodeValues)[hidden_nodes]) if hidden_nodes else 1.0
-    max_val = 5*math.ceil(max_activation/5) if max_activation is not None else min(actual_max * 1.2, 5.0)
+    max_val = 5 * math.ceil(max_activation / 5) if max_activation is not None else min(actual_max * 1.2, 5.0)
 
     if hidden_nodes:
         hidden_node_list = [nodes_list[i] for i in hidden_nodes]
@@ -289,13 +317,29 @@ def updateFrame(frame, ax1, ax3, G, pos, intermediateActivations, intermediateSo
                                node_color=output_node_colors, cmap=plt.cm.viridis,
                                vmin=0, vmax=1.0, alpha=0.7)
 
-    edges = nx.draw_networkx_edges(G, pos, ax=ax1,
-                                   edge_color=[G[u][v]['weight'] for u, v in G.edges()],
-                                   edge_cmap=plt.cm.RdYlBu, width=1, alpha=0.3)
+    if input_colorbar_node:
+        input_node = nodes_list[input_colorbar_node[0]]
+        nx.draw_networkx_nodes(G, pos, ax=ax1, nodelist=[input_node], node_size=1000,
+                               node_color='lightgray', alpha=0.9, node_shape='s')
+
+    first_layer_edges = [(u, v) for u, v in G.edges() if u == "input_colorbar"]
+    other_edges = [(u, v) for u, v in G.edges() if u != "input_colorbar"]
+
+    if first_layer_edges:
+        nx.draw_networkx_edges(G, pos, ax=ax1, edgelist=first_layer_edges,
+                               edge_color=[G[u][v]['weight'] for u, v in first_layer_edges],
+                               edge_cmap=plt.cm.RdYlBu, width=1.5, alpha=0.5)
+
+    if other_edges:
+        nx.draw_networkx_edges(G, pos, ax=ax1, edgelist=other_edges,
+                               edge_color=[G[u][v]['weight'] for u, v in other_edges],
+                               edge_cmap=plt.cm.RdYlBu, width=1, alpha=0.3)
 
     labels = {}
     for i, node in enumerate(G.nodes()):
-        if "dots" in node:
+        if node == "input_colorbar":
+            labels[node] = "Input\nLayer"
+        elif "dots" in node:
             labels[node] = "Remaining nodes"
         elif node.startswith(f"L{numOfHiddenLayers + 1}"):
             parts = node.split("_")
@@ -325,7 +369,7 @@ def updateFrame(frame, ax1, ax3, G, pos, intermediateActivations, intermediateSo
         ax1.text(x_pos, y_min, layer_name,
                  horizontalalignment='center',
                  verticalalignment='center',
-                 fontsize=8, fontweight='bold', color='black')
+                 fontsize=8*4//numOfHiddenLayers, fontweight='bold', color='black')
 
     probTextLeft = ""
     probTextRight = ""
@@ -342,13 +386,17 @@ def updateFrame(frame, ax1, ax3, G, pos, intermediateActivations, intermediateSo
     max_act_value = max(nodeValues) if nodeValues else 0
     ax3.text(0.05, 0.1, f"Max activation: {max_act_value:.2f}", fontsize=8, color='white')
 
-    return edges,
+    return []
+
+
 
 def createAnimation(fig, G, pos, intermediateActivations, intermediateSoftmax,
                     intermediateWeights, x_train, imageNumber, numOfHiddenLayers,
                     max_activation=None, checkpointDir="./checkpoints"):
-    ax1 = fig.axes[2]
-    ax3 = fig.axes[4]
+    ax1 = fig.axes[3]
+    ax3 = fig.axes[5]
+    ax_input_cbar = fig.axes[1]
+    ax_hidden_cbar = fig.axes[2]
 
     ani = FuncAnimation(
         fig,
@@ -356,7 +404,7 @@ def createAnimation(fig, G, pos, intermediateActivations, intermediateSoftmax,
         frames=len(intermediateSoftmax),
         interval=2000,
         blit=False,
-        fargs=(ax1, ax3, G, pos, intermediateActivations, intermediateSoftmax,
+        fargs=(ax1, ax3, ax_input_cbar, ax_hidden_cbar, G, pos, intermediateActivations, intermediateSoftmax,
                intermediateWeights, x_train, imageNumber, numOfHiddenLayers, max_activation)
     )
 
@@ -399,7 +447,7 @@ def generateSchema(testNumber=15, iterations=50,
 
     max_activation = np.ceil(max_activation)
 
-    fig, ax0, ax1, ax2, ax3, pos = setupPlot(x_train, y_train, testNumber, G, max_activation)
+    fig, ax0, ax_input_cbar, ax1, ax2, ax3, hidden_cbar, pos = setupPlot(x_train, y_train, testNumber, G, max_activation)
 
     ani = createAnimation(
         fig,
@@ -429,10 +477,11 @@ def generateSchema(testNumber=15, iterations=50,
 if __name__ == "__main__":
     result = generateSchema(
         testNumber=120,
-        iterations= 25,
-        numOfHiddenLayers= 2,
+        iterations=5,
+        numOfHiddenLayers= 3,
         numOfData=500,
         neuronCount=32,
-        activationFunction='tanh',
-        outputActivationFunction='softmax'
+        activationFunction='relu',
+        outputActivationFunction='softmax',
+        neuronsToDisplay = 10
     )
