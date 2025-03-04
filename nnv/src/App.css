@@ -14,18 +14,14 @@
   font-size: clamp(18px, 3vmin, 32px);
   font-family: Orbitron, "Segoe Script", sans-serif;
   font-weight: bold;
-  text-align: center;
   padding: 0 10px;
   flex: 1.5;
   display: flex;
   align-items: center;
-  justify-content: center;
+  padding-left:1%;
   height: 100%;
 }
 
-.Logo{
-
-}
 .NNV {
   background: linear-gradient(to right, #00b3b3, #000000);
   font-size: clamp(18px, 3vmin, 32px);
@@ -33,7 +29,7 @@
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
-  text-align: center;
+  padding-left: 8px;
 }
 
 .Contact {
@@ -64,63 +60,7 @@
   padding: 15px;
   border-right: 2px solid #00b3b3;
   overflow-y: auto;
-}
-
-.upload-section {
-  background-color: #111111;
-  border-radius: 8px;
-  padding: 15px;
-  color: white;
-  width: 100%;
-  box-sizing: border-box;
-  margin-bottom: 12px;
-}
-
-.upload-title {
-  font-family: Orbitron, sans-serif;
-  text-align: center;
-  color: #00b3b3;
-  margin-bottom: 12px;
-  font-size: 1.1em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.upload-area {
-  border: 2px dashed #00b3b3;
-  border-radius: 6px;
-  padding: 12px 8px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-bottom: 12px;
-  width: calc(100% - 16px);
-  box-sizing: border-box;
-  max-width: 180px;
-  margin-left: auto;
-  margin-right: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.upload-area:hover {
-  border-color: #008080;
-  background-color: rgba(0, 179, 179, 0.1);
-}
-
-.upload-icon {
-  color: #00b3b3;
-  margin-bottom: 8px;
-  font-size: 1.2em;
-}
-
-.upload-text {
-  color: #888;
-  font-size: 0.75em;
-  margin: 2px 0;
-  line-height: 1.2;
+  padding-top: 3%;
 }
 .slider-container {
   width: 100%;
@@ -197,18 +137,11 @@ input[type=number]{
   border: 2px solid #00b3b3;
   border-radius: 4px;
 }
-
-.visualization-area {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  padding: 20px;
-  background-color: #111111;
+.mnist{
+  border: 2px solid #00b3b3;
+  border-radius:5px;
+  margin:10px;
 }
-
 .mnist-display {
   display: flex;
   flex-direction: column;
@@ -226,7 +159,7 @@ input[type=number]{
 
 .mnist-label {
   margin-top: 10px;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: bold;
   color: #00b3b3;
 }
@@ -238,9 +171,21 @@ input[type=number]{
   height: 200px;
 }
 
+.visualization-area {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 5px;
+  background-color: #111111;
+}
+
 .placeholder-text {
   color: #666;
   text-align: center;
+  margin:2px;
 }
 .dropdown-container {
   width: 100%;
