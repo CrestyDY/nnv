@@ -2,6 +2,7 @@ flask
 flask-cors
 tensorflow
 matplotlib
-networkx
 gunicorn
 psutil
+networkx
+pillow

@@ -410,8 +410,8 @@ def createAnimation(fig, G, pos, intermediateActivations, intermediateSoftmax,
 
     plt.tight_layout()
 
-    animation_path = os.path.join(checkpointDir, 'neural_network_animation.mp4')
-    ani.save(animation_path, writer='ffmpeg', fps=1)
+    animation_path = os.path.join(checkpointDir, 'neural_network_animation.gif')
+    ani.save(animation_path, writer='pillow', fps=1)
     print(f"Animation saved to {animation_path}")
 
     return ani

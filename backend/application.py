@@ -132,14 +132,14 @@ def process():
     training_data_count = request.form.get("training_data_count")
     image_number = request.form.get("image_number")
     print("Process route entered")
-    video_path = "checkpoints/neural_network_animation.mp4"
+    animation_path = "checkpoints/neural_network_animation.gif"
     checkpoints_dir = "checkpoints"
     if not os.path.exists(checkpoints_dir):
         print(f"Creating checkpoints directory: {checkpoints_dir}")
         os.makedirs(checkpoints_dir)
     print(f"Current working directory: {os.getcwd()}")
-    abs_video_path = os.path.abspath(video_path)
-    print(f"Absolute video path: {abs_video_path}")
+    abs_animation_path = os.path.abspath(animation_path)
+    print(f"Absolute animation path: {abs_animation_path}")
     if image_number and image_number != "None":
         try:
             generateSchema(
@@ -154,22 +154,22 @@ def process():
                 0.0005,
                 True
             )
-            print("Checking for video file after generation:")
-            print(f"Video path exists: {os.path.exists(video_path)}")
+            print("Checking for animation file after generation:")
+            print(f"Animation path exists: {os.path.exists(animation_path)}")
             if os.path.exists(checkpoints_dir):
                 print("Checkpoints directory contents:")
                 for filename in os.listdir(checkpoints_dir):
                     print(f"- {filename}")
             time.sleep(2)
-            if os.path.exists(video_path):
-                file_size = os.path.getsize(video_path)
-                print(f"Video file size: {file_size} bytes")
+            if os.path.exists(animation_path):
+                file_size = os.path.getsize(animation_path)
+                print(f"Animation file size: {file_size} bytes")
                 if file_size > 0:
-                    return send_file(video_path, mimetype='video/mp4')
+                    return send_file(animation_path, mimetype='image/gif')
             return jsonify({
-                "error": "Video generation failed",
-                "details": "No video file found after generation",
-                "video_path": abs_video_path
+                "error": "Animation generation failed",
+                "details": "No animation file found after generation",
+                "animation_path": abs_animation_path
             }), 404
         except Exception as e:
             print(f"Exception during schema generation: {e}")

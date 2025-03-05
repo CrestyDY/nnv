@@ -128,12 +128,11 @@ function App() {
             }
 
             const contentType = response.headers.get("content-type");
-            if (contentType && contentType.includes("video/mp4")) {
+            if (contentType && contentType.includes("image/gif")) {
                 const videoBlob = await response.blob();
                 const videoObjectURL = URL.createObjectURL(videoBlob);
                 setVideoUrl(videoObjectURL);
 
-                // Set state to visualization complete
                 setVisualizationState('completed');
             } else {
                 const result = await response.json();
