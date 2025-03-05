@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/static/css/main.a851d1cc.css",
+    "main.js": "/static/js/main.cb60977d.js",
+    "static/js/488.aa614bba.chunk.js": "/static/js/488.aa614bba.chunk.js",
+    "static/media/nnv_logo.png": "/static/media/nnv_logo.f9dd4e258f9fde3175f6.png",
+    "index.html": "/index.html",
+    "main.a851d1cc.css.map": "/static/css/main.a851d1cc.css.map",
+    "main.cb60977d.js.map": "/static/js/main.cb60977d.js.map",
+    "488.aa614bba.chunk.js.map": "/static/js/488.aa614bba.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.a851d1cc.css",
+    "static/js/main.cb60977d.js"
+  ]
+}
