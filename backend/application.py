@@ -20,9 +20,8 @@ CORS(app, resources={
         "origins": [
             "https://neural-network-visualizer-sir5.onrender.com",
             "https://neuralnetworkvisualizer.co",
-            "https://www.neuralnetworkvisualizer.co",
-            "http://localhost:3000",
-            "http://localhost:5000"
+            "https://neural-network-visualizer-284688458200.us-central1.run.app",
+            "http://localhost:3000"
         ],
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"]

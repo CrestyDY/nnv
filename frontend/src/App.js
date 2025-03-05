@@ -19,7 +19,7 @@ function App() {
     const [videoUrl, setVideoUrl] = useState(null);
     const [visualizationState, setVisualizationState] = useState('initial');
 
-    const API_URL = process.env.REACT_APP_API_URL || 'https://neural-network-visualizer-backend.onrender.com';
+    const API_URL = process.env.REACT_APP_API_URL || 'https://neural-network-visualizer-284688458200.us-central1.run.app';
 
     useEffect(() => {
         if (imageNumber !== "None" && imageNumber !== "") {
