@@ -65,7 +65,8 @@
 .slider-container {
   width: 100%;
   max-width: 180px;
-  margin: 0 auto 2%;
+  margin: 0 auto 6%;
+
 }
 
 .slider-label {
@@ -102,8 +103,8 @@
 }
 
 .slider::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
+  width: 2%;
+  height: 2%;
   background: #00b3b3;
   cursor: pointer;
   border-radius: 50%;
@@ -112,7 +113,7 @@
 .input-container{
   width: 100%;
   max-width: 180px;
-  margin: 0 auto 12px;
+  margin: 0 auto 6%;
 }
 .input-label{
   font-family: Orbitron, sans-serif;
@@ -136,11 +137,13 @@ input[type=number]{
   color: #00b3b3;
   border: 2px solid #00b3b3;
   border-radius: 4px;
+
 }
 .mnist{
   border: 2px solid #00b3b3;
   border-radius:5px;
-  margin:10px;
+  margin: 2%;
+  margin-bottom: 10%;
 }
 .mnist-display {
   display: flex;
@@ -150,8 +153,8 @@ input[type=number]{
 }
 
 .mnist-image {
-  max-width: 200px;
-  max-height: 200px;
+  max-width: 90%;
+  max-height: 90%;
   border: 1px solid #ddd;
   border-radius: 4px ;
   background-color: #00b3b3;
@@ -159,7 +162,7 @@ input[type=number]{
 
 .mnist-label {
   margin-top: 10px;
-  font-size: 14px;
+  font-size: 0.8em;
   font-weight: bold;
   color: #00b3b3;
 }
@@ -206,13 +209,13 @@ input[type=number]{
 .dropdown-container {
   width: 100%;
   max-width: 180px;
-  margin: 0 auto 12px;
+  margin: 0 auto 6%;
 }
 .dropdown-label {
   color: #00b3b3;
   font-size: 0.8em;
   text-align: center;
-  margin-bottom: 5px;
+  margin-bottom: 2%;
   display: block;
 }
 .activation-dropdown {
@@ -242,7 +245,6 @@ input[type=number]{
 
 .submit-button{
   position: absolute;
-  bottom: 2%;
   left: 20%;
   width: 60%;
   height: 70px;
@@ -260,6 +262,7 @@ input[type=number]{
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
+  margin-top: 2%;
 }
 
 .submit-button:hover{
