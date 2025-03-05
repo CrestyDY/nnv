@@ -18,10 +18,14 @@ CORS(app)
 CORS(app, resources={
     r"/*": {
         "origins": [
+            "https://neural-network-visualizer-sir5.onrender.com",
             "https://neuralnetworkvisualizer.co",
             "https://www.neuralnetworkvisualizer.co",
-            "http://localhost:3000"  # Keep for local development
-        ]
+            "http://localhost:3000",
+            "http://localhost:5000"
+        ],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
     }
 })
 
@@ -61,29 +65,55 @@ def run_generate_schema(image_number, iterations, hidden_layers, training_data_c
 
 @app.route("/get_mnist_image/<image_number>", methods=["GET"])
 def get_mnist_image(image_number):
+    print(f"Received MNIST image request for number: {image_number}")
+    print(f"Total MNIST images available: {len(mnist_images)}")
+
     if image_number == "None":
+        print("No image number provided")
         return jsonify({"error": "No image number provided"}), 400
+
     try:
         image_idx = int(image_number)
+
         if image_idx < 0 or image_idx >= len(mnist_images):
-            return jsonify({"error": "Invalid image number"}), 400
+            print(f"Invalid image number: {image_idx}")
+            return jsonify({
+                "error": "Invalid image number",
+                "details": f"Number must be between 0 and {len(mnist_images)-1}"
+            }), 400
+
         image = mnist_images[image_idx]
         label = mnist_labels[image_idx]
+
         plt.figure(figsize=(3, 3))
         plt.imshow(image, cmap='gray')
+        plt.title(f'MNIST Digit: {label}')
         plt.axis('off')
+
         img_bytes = io.BytesIO()
         plt.savefig(img_bytes, format='png', bbox_inches='tight', pad_inches=0.1)
         img_bytes.seek(0)
         plt.close()
+
         return send_file(
             img_bytes,
             mimetype='image/png',
-            as_attachment=True,
+            as_attachment=False,
             download_name=f'mnist_image_{image_idx}_label_{label}.png'
         )
+
     except ValueError:
-        return jsonify({"error": "Image number must be an integer"}), 400
+        print(f"Invalid image number format: {image_number}")
+        return jsonify({
+            "error": "Invalid image number format",
+            "details": "Image number must be an integer"
+        }), 400
+    except Exception as e:
+        print(f"Unexpected error in get_mnist_image: {e}")
+        return jsonify({
+            "error": "Unexpected error",
+            "details": str(e)
+        }), 500
 
 @app.route("/process", methods=["POST"])
 def process():

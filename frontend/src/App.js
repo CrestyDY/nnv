@@ -19,7 +19,7 @@ function App() {
     const [videoUrl, setVideoUrl] = useState(null);
     const [visualizationState, setVisualizationState] = useState('initial');
 
-    const API_URL = process.env.REACT_APP_API_URL || 'https://neuralnetworkvisualizer.co/';
+    const API_URL = process.env.REACT_APP_API_URL || 'https://neural-network-visualizer-backend.onrender.com';
 
     useEffect(() => {
         if (imageNumber !== "None" && imageNumber !== "") {
@@ -34,8 +34,21 @@ function App() {
             setLoading(true);
             const response = await fetch(`${API_URL}/get_mnist_image/${imageNumber}`);
 
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+
             if (!response.ok) {
-                throw new Error('Failed to fetch image');
+                // Try to parse error response
+                const errorText = await response.text();
+                console.error('Error response body:', errorText);
+                throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            console.log('Content type:', contentType);
+
+            if (!contentType || !contentType.includes('image/png')) {
+                throw new Error(`Unexpected content type: ${contentType}`);
             }
 
             const imageBlob = await response.blob();
@@ -43,8 +56,8 @@ function App() {
             setMnistImage(imageObjectURL);
             setLoading(false);
         } catch (error) {
-            console.error('Error fetching MNIST image:', error);
-            setError('Failed to load MNIST image');
+            console.error('Detailed error fetching MNIST image:', error);
+            setError(`Failed to load MNIST image: ${error.message}`);
             setLoading(false);
         }
     };
