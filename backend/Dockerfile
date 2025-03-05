@@ -5,9 +5,7 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     libfreetype6-dev \
     libpng-dev \
-    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
-
 # Set the working directory in the container
 WORKDIR /app
 

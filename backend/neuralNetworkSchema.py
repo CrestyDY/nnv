@@ -4,8 +4,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-from matplotlib.animation import FuncAnimation
-
+from matplotlib.animation import FuncAnimation, PillowWriter
 
 def getNodeName(layerIndex, neuronIndex, layerType="neuron"):
     return f"L{layerIndex}_{layerType}_{neuronIndex}"
@@ -411,7 +410,7 @@ def createAnimation(fig, G, pos, intermediateActivations, intermediateSoftmax,
     plt.tight_layout()
 
     animation_path = os.path.join(checkpointDir, 'neural_network_animation.gif')
-    ani.save(animation_path, writer='pillow', fps=1)
+    ani.save(animation_path, writer= PillowWriter(fps=1))
     print(f"Animation saved to {animation_path}")
 
     return ani
@@ -468,7 +467,7 @@ def generateSchema(testNumber=15, iterations=50,
     return {
         "model": model,
         "history": history,
-        "animation_path": os.path.join("./checkpoints", 'neural_network_animation.mp4'),
+        "animation_path": os.path.join("./checkpoints", 'neural_network_animation.gif'),
         "graph": G,
         "figure": fig,
         "max_activation": max_activation

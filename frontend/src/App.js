@@ -164,14 +164,22 @@ function App() {
                 );
             case 'completed':
                 return videoUrl ? (
-                    <video
-                        width="auto"
-                        height="95%"
-                        controls
-                        src={videoUrl}
-                    >
-                        Your browser does not support the video tag.
-                    </video>
+                    <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <img
+                            src={videoUrl}
+                            alt="Neural Network Visualization"
+                            style={{
+                                maxWidth: '100%',
+                                maxHeight: '95%',
+                                objectFit: 'contain'
+                            }}
+                            onLoad={() => console.log('Image loaded successfully')}
+                            onError={(e) => {
+                                console.error('Image loading error', e);
+                                console.error('Image source:', videoUrl);
+                            }}
+                        />
+                    </div>
                 ) : null;
             case 'error':
                 return (
