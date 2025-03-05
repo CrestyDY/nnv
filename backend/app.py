@@ -115,7 +115,7 @@ def get_mnist_image(image_number):
             "details": str(e)
         }), 500
 
-@app.route("/process", methods=["POST"], cors=False)
+@app.route("/process", methods=["POST"])
 def process():
     print("Process Route - Request Method:", request.method)
     print("Process Route - Request Headers:", request.headers)
