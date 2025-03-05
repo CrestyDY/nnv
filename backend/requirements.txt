@@ -3,3 +3,4 @@ flask-cors
 tensorflow
 matplotlib
 networkx
+gunicorn
