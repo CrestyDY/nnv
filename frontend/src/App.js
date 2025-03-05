@@ -19,6 +19,12 @@ function App() {
     const [videoUrl, setVideoUrl] = useState(null);
     const [visualizationState, setVisualizationState] = useState('initial');
 
+    const API_URL = process.env.REACT_APP_API_URL || 'https://neuralnetworkvisualizer.co/';
+
+    fetch(`${API_URL}/process`, {
+        method: 'POST',
+    })
+
     useEffect(() => {
         if (imageNumber !== "None" && imageNumber !== "") {
             fetchMnistImage();

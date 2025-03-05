@@ -17,7 +17,11 @@ CORS(app)
 
 CORS(app, resources={
     r"/*": {
-        "origins": ["https://neuralnetworkvisualizer.co/"]  # More permissive for deployment
+        "origins": [
+            "https://neuralnetworkvisualizer.co",
+            "https://www.neuralnetworkvisualizer.co",
+            "http://localhost:3000"  # Keep for local development
+        ]
     }
 })
 
