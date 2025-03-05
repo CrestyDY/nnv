@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file, send_from_directory
+from flask import Flask, request, jsonify, send_file, send_from_directory, make_response
 from flask_cors import CORS
 from neuralNetworkSchema import generateSchema
 import matplotlib
@@ -115,8 +115,17 @@ def get_mnist_image(image_number):
             "details": str(e)
         }), 500
 
-@app.route("/process", methods=["POST"])
+@app.route("/process", methods=["POST"], cors=False)
 def process():
+    print("Process Route - Request Method:", request.method)
+    print("Process Route - Request Headers:", request.headers)
+    print("Process Route - Request Origin:", request.headers.get('Origin'))
+
+    response = make_response()
+    response.headers.add("Access-Control-Allow-Origin", "https://neuralnetworkvisualizer.co")
+    response.headers.add("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type")
+
     file = request.files.get("file")
     hidden_layers = request.form.get("hidden_layers")
     iterations = request.form.get("iterations")

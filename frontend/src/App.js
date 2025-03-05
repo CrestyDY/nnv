@@ -38,7 +38,6 @@ function App() {
             console.log('Response headers:', response.headers);
 
             if (!response.ok) {
-                // Try to parse error response
                 const errorText = await response.text();
                 console.error('Error response body:', errorText);
                 throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
