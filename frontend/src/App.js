@@ -21,10 +21,6 @@ function App() {
 
     const API_URL = process.env.REACT_APP_API_URL || 'https://neuralnetworkvisualizer.co/';
 
-    fetch(`${API_URL}/process`, {
-        method: 'POST',
-    })
-
     useEffect(() => {
         if (imageNumber !== "None" && imageNumber !== "") {
             fetchMnistImage();
@@ -36,7 +32,7 @@ function App() {
     const fetchMnistImage = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`http://localhost:5000/get_mnist_image/${imageNumber}`);
+            const response = await fetch(`${API_URL}/get_mnist_image/${imageNumber}`);
 
             if (!response.ok) {
                 throw new Error('Failed to fetch image');
@@ -107,7 +103,7 @@ function App() {
         }
 
         try {
-            const response = await fetch("http://localhost:5000/process", {
+            const response = await fetch(`${API_URL}/process`, {
                 method: "POST",
                 body: formData,
             });
