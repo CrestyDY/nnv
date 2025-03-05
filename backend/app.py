@@ -17,7 +17,7 @@ CORS(app)
 
 CORS(app, resources={
     r"/*": {
-        "origins": ["https://neuralnetworkvisualizer.co"]  # More permissive for deployment
+        "origins": ["https://neuralnetworkvisualizer.co/"]  # More permissive for deployment
     }
 })
 
