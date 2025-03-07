@@ -260,7 +260,7 @@ function App() {
                     <div className="mnist">
                         {loading ? (
                             <div className="loading-container">
-                                <p>Loading MNIST image...</p>
+                                <div className = "spinner"></div>
                             </div>
                         ) : mnistImage ? (
                             <div className="mnist-display">
