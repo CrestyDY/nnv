@@ -194,6 +194,15 @@ function App() {
 
     return (
         <div>
+            <!-- Google tag (gtag.js) -->
+            <script async src="https://www.googletagmanager.com/gtag/js?id=G-0PN7PG4DSJ"></script>
+            <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments)};
+                gtag('js', new Date());
+
+                gtag('config', 'G-0PN7PG4DSJ');
+            </script>
             <div className="Header">
                 <div className="Title">
                     <img src={logo} alt="logo" height="90%"></img>

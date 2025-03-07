@@ -132,7 +132,7 @@ def process():
     training_data_count = request.form.get("training_data_count")
     image_number = request.form.get("image_number")
     print("Process route entered")
-    animation_path = "checkpoints/neural_network_animation.gif"
+    animation_path = "checkpoints/neural_network_animation.mp4"
     checkpoints_dir = "checkpoints"
     if not os.path.exists(checkpoints_dir):
         print(f"Creating checkpoints directory: {checkpoints_dir}")
@@ -165,7 +165,7 @@ def process():
                 file_size = os.path.getsize(animation_path)
                 print(f"Animation file size: {file_size} bytes")
                 if file_size > 0:
-                    return send_file(animation_path, mimetype='image/gif')
+                    return send_file(animation_path, mimetype='video/mp4')
             return jsonify({
                 "error": "Animation generation failed",
                 "details": "No animation file found after generation",
